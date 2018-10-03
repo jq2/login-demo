@@ -76,7 +76,6 @@ int do_loginAccount(char *name, char *password) {
     }
     else
     {
-        printf("Enter password: \n");
     }
     return 0;
 }
@@ -139,13 +138,18 @@ int do_checkLogin(char *filename) {
         term_tmp = term;
         term.c_lflag &= ~ECHO;
         tcsetattr(STDIN_FILENO, TCSANOW, &term);
+
+
+
         scanf("%s", tmp_password);
-        printf("Your password is: %s\n", tmp_password);
+        printf("Read: %s\n", tmp_password);
+
         tcsetattr(STDIN_FILENO, TCSANOW, &term_tmp);
+
 
         // registerNewAccount(tmp_password);
         callback__registerFile(filename, tmp_password);
-        printf("[DEBUG]: #EOF STEP\n");
+        printf("[DEBUG] FINAL STEP\n");
     }
     return 0;
 }
