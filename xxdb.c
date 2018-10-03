@@ -1,24 +1,12 @@
-/**
- * @filename: db.c
- * @author: Dan Morris
- * @desc: Simple user flat-file based DB.
- *
- */
-
-// System headers
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <termios.h>
-#include <unistd.h>
 
-// Constants/Macros
 #define ACCOUNT_EXIST (0x1)
 #define USER_NAME "usernam3"
 #define PASS_WORD "p4ssworD"
 
-// Function definitions
 void do_testLogin();
 int do_registerAccount(char *name, char *password);
 int do_loginAccount(char *name, char *password);
@@ -26,14 +14,8 @@ int createAccount(char *name, char *password);
 int closeFile(char *name);
 int do_checkFile(char *filename);
 int do_checkLogin(char *filename);
-int callback__registerFile(char *name, char *tmp_password);
 
-
-// Global variables
 FILE *fptr;
-
-
-
 
 int main() {
 
@@ -46,7 +28,6 @@ int main() {
     //      @return: 
     //          1: If the account does not exists
     //          0: If the account is already registered
-    //          
     //          255: For system error's
     //
     //***************************************************
@@ -177,7 +158,6 @@ int do_checkFile(char *filename) {
 int do_checkLogin(char *filename) {
     char tmp_password[32];
 
-    struct termios term, term_tmp;
     printf("Checking login/filename: %s\n", filename);
 
     printf("[STATUS]\nRegistro não consta no banco de dados\n");
@@ -191,30 +171,12 @@ int do_checkLogin(char *filename) {
         // account not found...
         printf("Registrando...\nDigite sua nova senha: ");
         printf("\n");
-        tcgetattr(STDIN_FILENO, &term);
-        term_tmp = term;
-        term.c_lflag &= ~ECHO;
-        tcsetattr(STDIN_FILENO, TCSANOW, &term);
-
 
 
         scanf("%s", tmp_password);
         printf("Read: %s\n", tmp_password);
-
-        tcsetattr(STDIN_FILENO, TCSANOW, &term_tmp);
-
-
-        // registerNewAccount(tmp_password);
-        callback__registerFile(filename, tmp_password);
-        printf("[DEBUG] FINAL STEP\n");
+        registerNewAccount(password);
     }
-    return 0;
-}
-
-int callback__registerFile(char *name, char *tmp_password) {
-    printf("[DEBUG::CALLBACK::callback__registerFile(%s, %s)\n", name, tmp_password);
-
-    do_registerAccount(name, tmp_password);
     return 0;
 }
 
