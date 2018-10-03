@@ -12,7 +12,7 @@
 void do_testLogin();
 int do_registerAccount(char *name, char *password);
 int do_loginAccount(char *name, char *password);
-int createAccount(char *name, char *password);
+int do_createAccount(char *name, char *password);
 int closeFile(char *name);
 int do_checkFile(char *filename);
 int do_checkLogin(char *filename);
@@ -28,17 +28,15 @@ int main() {
 
 void do_testLogin() {
     printf("Seja bem-vindo ao UCP (User-C0ntrol-Panel)\n");
-    if ( createAccount(USER_NAME, PASS_WORD) == ACCOUNT_EXIST) {
+    if ( do_createAccount(USER_NAME, PASS_WORD) == ACCOUNT_EXIST) {
         do_loginAccount(USER_NAME, PASS_WORD);
-    }
-    else
-    {
+    } else {
         do_registerAccount(USER_NAME, PASS_WORD);
     }
 }
 
 
-int createAccount(char *name, char *password) {
+int do_createAccount(char *name, char *password) {
     fptr = fopen(name, "w+");
     char buf[128];
     char tmp_a[10] = {0};
@@ -61,7 +59,6 @@ int createAccount(char *name, char *password) {
     return 0;
 }
 
-
 int do_loginAccount(char *name, char *password) {
     int ret;
     char data[12];
@@ -74,44 +71,31 @@ int do_loginAccount(char *name, char *password) {
         exit(1);
         return 1;
     }
-    else
-    {
+    else {
+        // ...
     }
     return 0;
 }
-
-
 
 int do_registerAccount(char *name, char *password) {
     printf("[DEBUG] do_registerAccount\n");
+    do_createAccount(name, password); 
     return 0;
 }
 
-
-
 int do_checkFile(char *filename) {
+    FILE * file;
 
     printf("[DEBUG] do_checkFile()...\n");
 
-    FILE * file;
     file = fopen(filename, "r");
-    if (file)
-    {
-        // file exists and can be opened 
-        // ...
-        // close file when you're done
-        //         fclose(file);
+
+    if (file) {
         fclose(file);
         return 1;
-    } 
-    else
-    {
-        //file doesn't exists or cannot be opened (es. you don't have access permission )
+    } else {
         return 0;
     }
-    //
-
-
     return 0;
 }
 
@@ -119,37 +103,32 @@ int do_checkFile(char *filename) {
 
 int do_checkLogin(char *filename) {
     char tmp_password[32];
-
     struct termios term, term_tmp;
-    printf("Checking login/filename: %s\n", filename);
 
-    printf("[STATUS]\nRegistro não consta no banco de dados\n");
-    // if (do_checkFile(filename) == 1) {
+    printf("Checking login/filename: %s\n", filename);
+    printf("[STATUS]\n\
+            Registro não consta no banco de dados\n");
+
     if (do_checkFile(filename) == 1) {
-        // account exists
-        printf("Logando...\nDigite a sua senha para logar: ");
+        printf("Logando...\n\
+                Digite a sua senha para logar: ");
         printf("\n");
     }
     else {
-        // account not found...
-        printf("Registrando...\nDigite sua nova senha: ");
+        printf("Registrando...\n\
+                Digite sua nova senha: ");
         printf("\n");
+
         tcgetattr(STDIN_FILENO, &term);
         term_tmp = term;
         term.c_lflag &= ~ECHO;
         tcsetattr(STDIN_FILENO, TCSANOW, &term);
 
-
-
         scanf("%s", tmp_password);
-        printf("Read: %s\n", tmp_password);
+        printf("Your password: %s\n", tmp_password);
 
         tcsetattr(STDIN_FILENO, TCSANOW, &term_tmp);
-
-
-        // registerNewAccount(tmp_password);
         callback__registerFile(filename, tmp_password);
-        printf("[DEBUG] FINAL STEP\n");
     }
     return 0;
 }
