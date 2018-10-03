@@ -1,3 +1,8 @@
+/* @filename: new.c
+ * @desc: simple login application
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,9 +25,11 @@ int closeFile(char *name);
 int do_checkFile(char *filename);
 int do_checkLogin(char *filename);
 int callback__registerFile(char *name, char *tmp_password);
+int callback__loadFile(char *name, char *tmp_password);
 
 
 FILE *fptr;
+bool debugIsOn = false;
 
 
 int main() {
@@ -32,7 +39,7 @@ int main() {
 
 
 void do_testLogin() {
-    printf("Seja bem-vindo ao UCP (User-C0ntrol-Panel)\n");
+    printf("Seja bem-vindo ao UCP (User-Control-Panel)\n");
     if ( do_createAccount(USER_NAME, PASS_WORD) == ACCOUNT_EXIST) {
         do_loginAccount(USER_NAME, PASS_WORD);
     } else {
@@ -46,13 +53,15 @@ int do_createAccount(char *name, char *password) {
     char buf[128];
 
     if (fptr) {
-        printf("[DEBUG] Registrando conta...\n");
+        if (debugIsOn)
+            printf("[DEBUG] Registrando conta...\n");
         sprintf(buf, "name=%s\n", name);
         fprintf(fptr, buf);
         fclose(fptr);
     }
     else {
-        printf("[DEBUG] ERROR !!!!!\n");
+        if (debugIsOn)
+            printf("[DEBUG] ERROR !!!!!\n");
         // fclose(fptr);
         exit(EXIT_FAILURE);
     }
@@ -65,8 +74,15 @@ int do_createAccount(char *name, char *password) {
 int do_loginAccount(char *name, char *password) {
     int ret;
     char data[12];
+    
+    // não está sendo usado...
+    if (debugIsOn)
+        printf("[DEBUG] do_loginAccount: %d\n", ret);
 
-    printf("[DEBUG] do_loginAccount: %d\n", ret);
+    printf("file:pass: %s\n", getUserPassword(name, "password"));
+    printf("user:pass: %s\n", password);
+
+    /*
     if (do_checkFile(name)) {
         printf("Enter your password: \n");
         scanf("%s", data);
@@ -77,11 +93,16 @@ int do_loginAccount(char *name, char *password) {
     else {
         // ...
     }
+    */
+
+
     return 0;
 }
 
 int do_registerAccount(char *name, char *password) {
-    printf("[DEBUG] do_registerAccount\n");
+    if (debugIsOn)
+        printf("[DEBUG] do_registerAccount\n");
+
     do_createAccount(name, password); 
     return 0;
 }
@@ -89,7 +110,8 @@ int do_registerAccount(char *name, char *password) {
 int do_checkFile(char *filename) {
     FILE * file;
 
-    printf("[DEBUG] do_checkFile()...\n");
+    if (debugIsOn)
+        printf("[DEBUG] do_checkFile()...\n");
 
     file = fopen(filename, "r");
 
@@ -105,31 +127,30 @@ int do_checkFile(char *filename) {
 
 
 int do_checkLogin(char *filename) {
-    char tmp_password[32];
+    char tmp_password[32] = {0};
     struct termios term, term_tmp;
 
-    printf("Checking login/filename: %s\n", filename);
-    printf("[STATUS]\n\
-            Registro não consta no banco de dados\n");
-
     if (do_checkFile(filename) == 1) {
-        printf("Logando...\n\
-                Digite a sua senha para logar: ");
-        printf("\n");
-    }
-    else {
-        printf("Registrando...\n\
-                Digite sua nova senha: ");
+        printf("[LOGIN] Usuário %s é cadastrado, fazendo login,...\nDigite sua senha para logar: ", filename);
         printf("\n");
 
         tcgetattr(STDIN_FILENO, &term);
         term_tmp = term;
         term.c_lflag &= ~ECHO;
         tcsetattr(STDIN_FILENO, TCSANOW, &term);
-
         scanf("%s", tmp_password);
-        printf("Your password: %s\n", tmp_password);
+        tcsetattr(STDIN_FILENO, TCSANOW, &term_tmp);
+        callback__loadFile(filename, tmp_password);
+    }
+    else {
+        printf("[REGISTRO] Registrando conta...\nDigite sua nova senha: ");
+        printf("\n");
 
+        tcgetattr(STDIN_FILENO, &term);
+        term_tmp = term;
+        term.c_lflag &= ~ECHO;
+        tcsetattr(STDIN_FILENO, TCSANOW, &term);
+        scanf("%s", tmp_password);
         tcsetattr(STDIN_FILENO, TCSANOW, &term_tmp);
         callback__registerFile(filename, tmp_password);
     }
@@ -137,11 +158,16 @@ int do_checkLogin(char *filename) {
 }
 
 int callback__registerFile(char *name, char *tmp_password) {
-    printf("[DEBUG::CALLBACK::callback__registerFile(%s, %s)\n", name, tmp_password);
+    if (debugIsOn)
+        printf("[DEBUG] callback__registerFile(%s, %s)\n", name, tmp_password);
 
     do_registerAccount(name, tmp_password);
     return 0;
 }
 
-
-
+int callback__loadFile(char *name, char *tmp_password) {
+    if (debugIsOn)
+        printf("[DEBUG] callback__loadFile(%s, %s\n", name, tmp_password);
+    do_loginAccount(name, tmp_password);
+    return 0;
+}

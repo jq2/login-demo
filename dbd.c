@@ -5,12 +5,9 @@
 #include <termios.h>
 #include <unistd.h>
 
-
-#define ACCOUNT_EXIST       (0x1)
-#define ACCOUNT_NOT_FOUND   (0x2)
-#define USER_NAME           "usernam3"
-#define PASS_WORD           "p4ssworD"
-
+#define ACCOUNT_EXIST (0x1)
+#define USER_NAME "usernam3"
+#define PASS_WORD "p4ssworD"
 
 void do_testLogin();
 int do_registerAccount(char *name, char *password);
@@ -24,12 +21,10 @@ int callback__registerFile(char *name, char *tmp_password);
 
 FILE *fptr;
 
-
 int main() {
     do_checkLogin("username.ini");
     return 0;
 }
-
 
 void do_testLogin() {
     printf("Seja bem-vindo ao UCP (User-C0ntrol-Panel)\n");
@@ -44,6 +39,8 @@ void do_testLogin() {
 int do_createAccount(char *name, char *password) {
     fptr = fopen(name, "w+");
     char buf[128];
+    char tmp_a[10] = {0};
+    char tmp_b[10] = {0};
 
     if (fptr) {
         printf("[DEBUG] Registrando conta...\n");
